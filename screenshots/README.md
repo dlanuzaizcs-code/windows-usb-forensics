@@ -1,17 +1,13 @@
-# Reviewed visuals (selected subset)
+# Figures and visual evidence
 
-Only 3 review-selected images from the supplied screenshots are included in this staging package:
+The included PNG files have been visually reviewed and re-encoded without their original embedded metadata.
 
-- `architecture-six-layers.png`: conceptual architecture diagram.
-- `experiment-1-threshold-metrics.png`: results of the separated-class synthetic experiment.
-- `experiment-2-roc.png`: ROC curve from the overlapping-class synthetic experiment.
+| Figure | What it shows |
+| --- | --- |
+| `architecture-six-layers.png` | Conceptual acquisition-to-response architecture |
+| `experiment-1-threshold-metrics.png` | Precision, recall and F1 at different detection thresholds in the separated-class synthetic experiment |
+| `experiment-2-roc.png` | ROC curve of the overlapping synthetic experiment (thesis-reported AUC ≈ 0.87) |
 
-PNG files were re-encoded without original metadata. These images contain no visible device identifiers or TOTP QR codes in the reviewed previews. **A manual final review is still required** before public release.
+The figures do not contain visible device identifiers or authenticator enrollment QR codes. They are **historical, synthetic-study results**, not measurements of production detection accuracy.
 
-## Originals deliberately omitted
-
-- `10.x_TOTP.png`: contains a TOTP enrollment QR and provisioning URI; **must never be published**. Rotate the TOTP secret if it is still in use.
-- Other application screenshots show potentially identifying USB serial numbers, device identifiers, usernames or timestamps. Their publication requires redaction and separate review.
-- No raw Windows artifact files, database records, audit logs or generated HTML/JSON reports are included.
-
-The included charts are reported historical thesis results using **synthetic datasets**; they are not current production performance measurements.
+Screenshots displaying real USB serials, event timelines, application-use history, authentication secrets or provisioning information are intentionally excluded. The original unredacted screenshots are not part of this repository.
