@@ -19,9 +19,10 @@ Input: `TFM_Project.zip`, filtered to own code without `.git`, `.venv`, caches, 
 
 - Python 3.13 AST syntax check: **65 selected files parsed**, **0 syntax errors**.
 - Tests on Linux/Python 3.13 with local available dependencies: **96 passed, 2 failed because `pyotp` was not installed**; failing tests `test_totp_generar_y_verificar` and `test_totp_uri_y_qr` from `tests/test_schedule_totp.py`.
-- Real Windows 11 artifact acquisition, PyQt6 GUI, TOTP and physical USB device blocking were **not** independently executed.
+- **Windows verification (project owner, 30 October 2026):** after installing dependencies in a fresh virtual environment, `python -m pytest -q` returned **98 passed in 9.22s**. This resolves the earlier missing-dependency failures. The test suite includes TOTP logic, but this does **not** establish end-to-end Windows artifact acquisition, GUI behavior or real USB blocking.
+- Real Windows 11 artifact acquisition, PyQt6 GUI and physical USB device blocking were **not** independently executed in this review.
 
-## Reproduce on Windows in isolated testing environment
+## Reproduce the completed tests on Windows in an isolated environment
 
 From the `src` directory:
 
