@@ -1,51 +1,67 @@
 # Windows USB Forensics & Explainable Anomaly Detection
 
-**Master's thesis (Cybersecurity) · University of Alicante · 2026**  
-**Author:** Diego Lanuza Izquierdo
+**Cybersecurity Master's Thesis · University of Alicante · 2026**  
+**Author:** Diego Lanuza Izquierdo · **Platform:** Windows 11
 
-> **Private staging release. Do not make this repository public yet.** The source and a carefully selected set of visuals are included; review the implementation, personal-data handling, security controls, screenshots, software rights, and Git history before publishing.
+A completed Python/PyQt6 desktop research prototype that reconstructs USB device activity, correlates forensic artifacts, models normal behavior and flags explainable anomalies. It also explores configurable defensive responses for suspicious removable-device activity.
 
-A Windows 11 forensic desktop prototype that reconstructs USB activity from Windows Registry, Event Logs and SetupAPI; correlates evidence in SQLite; scores behavioral deviations; and offers configurable defensive response with a PyQt6 interface and HTML/JSON reports.
+**[Portfolio](https://diegolanuza.es)** · **[Cyber Defense Lab](https://github.com/dlanuzaizcs-code/soc-homelab-showcase)**
 
-## Highlights
+## What the project demonstrates
 
-- Forensic reconstruction using Registry / USBSTOR, EVTX and SetupAPI.
-- Correlation and deduplication of removable-device sessions.
-- SQLite evidence persistence with per-event SHA-256 (not a tamper-proof chain of custody).
-- Explainable anomaly score across time rarity, device rarity and Mahalanobis distance.
-- Learning, monitoring and strict modes; optional device blocking and TOTP verification.
-- GUI for device, alert and activity statistics; export to HTML / JSON.
+- **USB forensics:** acquisition from Windows Registry / USBSTOR, EVTX event logs and SetupAPI.
+- **Evidence correlation:** device identifiers, timestamps, sessions and source attribution, normalized and persisted in SQLite.
+- **Explainable detection:** anomaly components for unfamiliar devices, unusual connection times and multivariate behavioral deviation (Mahalanobis distance).
+- **Defensive controls:** learning, monitoring and strict modes; alerts, a trusted-device list and TOTP-mediated recovery from strict-policy blocking.
+- **Investigation workflow:** PyQt6 GUI with device inventory, alerts, statistics and HTML/JSON exports.
+- **Testing:** a reproducible pytest suite using isolated state and mocked hardware-dependent operations.
 
 ## Architecture
 
-![Six-layer architecture of the USB forensic application](screenshots/architecture-six-layers.png)
+![Six-layer conceptual system architecture](screenshots/architecture-six-layers.png)
 
-[Architecture details](docs/architecture.md) · [Source layout / local setup](src/README.md) · [Security notes](SECURITY.md)
+Acquisition → Normalization & Correlation → SQLite Evidence Store → Analytics → Policy & Response → UI & Reporting
 
-## Technical stack
+[Architecture and policy details](docs/architecture.md) · [Source overview](src/README.md)
 
-Python 3.13 · PyQt6 · SQLite · python-registry / winreg · EVTX · NumPy / SciPy / pandas · Jinja2 · pyotp · pytest.
+## Validation
 
-## Results and reproducibility
+**98 / 98 automated tests passed on Windows** in a test run performed by the author on **30 October 2026** (`pytest -q`, **9.22 seconds**). The submitted June 2026 thesis documented 74 tests; the repository includes the later 98-test snapshot.
 
-The June 2026 thesis reports **74 tests** and an AUC of approximately **0.87** on an overlapping-class **synthetic** experiment (50 sessions); it is a controlled research result, not an enterprise detection benchmark. A separate synthetic benchmark of 1,095 sessions took approximately 2 seconds in the documented test setting.
+The thesis reports **ROC AUC ≈ 0.87** on a **synthetic, overlapping-class dataset of 50 USB sessions**. Results from controlled synthetic data must **not** be interpreted as deployment performance or proof of malicious activity.
 
-A 30 October 2026 source inspection found **65 selected Python files**. An initial Linux test run passed 96 tests; two TOTP tests were blocked because `pyotp` was unavailable in that environment. **On Windows, after installing the project dependencies, the project owner ran `python -m pytest -q`: 98 passed in 9.22 seconds.** This validates the automated test suite in the user's Windows environment, **not** full GUI operation or physical USB-blocking behavior.
+![ROC curve — overlapping synthetic scenario](screenshots/experiment-2-roc.png)
 
-![ROC of the overlapping synthetic experiment](screenshots/experiment-2-roc.png)
+![Precision, recall and F1 — separated synthetic scenario](screenshots/experiment-1-threshold-metrics.png)
 
-See [Validation](docs/validation.md) for methodology and limitations.
+[Read the validation methodology and limitations](docs/validation.md).
 
-## Source
+## Technology
 
-The application source is under [`src/`](src/). It was copied from the supplied original project while excluding runtime/private artifacts, nested Git history and the virtual environment. On Windows, install dependencies inside a fresh environment and run the tests **before** attempting normal use. See [`src/README.md`](src/README.md).
+Python 3 · PyQt6 · SQLite · Windows Registry / EVTX / SetupAPI · NumPy / SciPy / pandas · Jinja2 · pyotp (TOTP) · pytest.
 
-## Publication boundary
+## Reproduce the automated tests
 
-This repository is still **private**. It does **not** contain original SQLite data, generated reports, logs, original Git history, raw Windows forensics, unreviewed device screenshots or TOTP enrollment screenshots. Even so, the source should receive another manual code and history review before going public.
+On a **Windows 11 test environment**, with Python 3.13 available:
 
-[Publication audit](docs/publication-review.md) · [Next steps](docs/next-steps.md)
+```powershell
+cd src
+py -3.13 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pytest -q
+```
 
-**Portfolio:** [diegolanuza.es](https://diegolanuza.es) · **Cyber defense lab:** [soc-homelab-showcase](https://github.com/dlanuzaizcs-code/soc-homelab-showcase)
+The application entry point is `src/main.py`. For a read-only first inspection, use a standard-user account and review the [security guidance](SECURITY.md) before running the GUI. **Strict mode can attempt physical device blocking with elevated privileges; never enable it on critical USB hardware.**
 
-**License:** not selected pending rights review. No blanket permission to redistribute the code is granted.
+## Scope and limitations
+
+This is a **finished academic prototype**, not a production endpoint protection platform.
+
+- USB artifacts are indirect evidence; they do not prove that files were copied.
+- Event-log access and physical blocking may require administrator privileges.
+- Background monitoring runs only while the application is running, not as an independent Windows service.
+- Per-event SHA-256 supports integrity checking, but does not establish a tamper-proof forensic chain of custody.
+- Detection metrics are based on controlled synthetic experiments; real-world false-positive rates remain unmeasured.
+- Runtime SQLite databases, real system logs, device-identifying screenshots and TOTP enrollment data are intentionally not distributed.
+
+**Distribution:** source is presented for technical review. No software license has been granted; redistribution or reuse permissions have not been specified. Academic or third-party rights must be respected.
