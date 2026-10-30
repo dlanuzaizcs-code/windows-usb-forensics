@@ -1,46 +1,52 @@
-# Architecture and data flow
+# Architecture and verified behavior
 
-The academic report (section 8) describes six layers. This is a documented conceptual architecture; the actual code files must still be inspected to verify current implementation and dependencies.
+The completed Windows 11 prototype uses the six-layer conceptual design documented in the thesis. The corresponding modules are present under `src/`.
 
-1. **Acquisition**: Registry, EVTX, SetupAPI and live Windows signals.
-2. **Normalization & correlation**: timestamps, device IDs, deduplication and reconstruction of USB sessions.
-3. **Evidence store**: SQLite tables for devices, sessions, events, alerts, model state, system signals and configuration.
-4. **Analytics**: reference behavior and transparent anomaly scoring using device familiarity, connection times and related patterns.
-5. **Policy & response**: selected learning/monitoring/strict modes, alerts and conditional enforcement.
-6. **User interface & reporting**: PyQt6 UI; exports to HTML/JSON.
+| Layer | Implementation | Responsibility |
+| --- | --- | --- |
+| Acquisition | `src/acquisition/` | Windows Registry, EVTX, SetupAPI and connected device / activity signals |
+| Normalization & Correlation | `src/normalization/` | Identifier and timestamp normalization; event/session correlation |
+| Evidence Store | `src/store/` | SQLite persistence, device/session/event records and hash-based integrity checks |
+| Analytics | `src/analytics/` | Behavior baseline, explainable anomaly scores and statistical evaluation |
+| Policy & Response | `src/analytics/prevention.py`, `src/monitoring/`, `src/security/` | Response policy, continuous monitoring, schedule and TOTP |
+| UI & Reporting | `src/ui/`, `src/reporting/` | PyQt6 views, statistics and HTML/JSON reports |
 
 ```mermaid
 flowchart LR
-  A[Windows artifacts] --> B[Acquisition]
-  B --> C[Normalize + correlate]
-  C --> D[(SQLite)]
-  D --> E[Behavior baseline + score]
-  E --> F[Policy + response]
-  F --> G[Alert UI]
-  D --> H[Reports]
+    A[Windows USB artifacts] --> B[Acquisition]
+    B --> C[Normalize and correlate]
+    C --> D[(SQLite evidence store)]
+    D --> E[Behavior analysis]
+    E --> F[Policy and response]
+    F --> G[PyQt6 alerts and views]
+    D --> H[HTML / JSON reports]
 ```
 
-## Modules in the thesis (section 9.1)
+## Operating modes
 
-| Original module | Responsibility reported in thesis |
-| --- | --- |
-| `acquisition/` | Registry/EVTX/SetupAPI and system signals |
-| `normalization/` | Normalization and correlation |
-| `store/` | Persistence |
-| `analytics/` | Anomaly model, orchestration, statistics and validation |
-| `monitoring/` | Background polling |
-| `security/` | Schedule logic, TOTP and privileges |
-| `ui/` | PyQt6 interface |
-| `reporting/` | HTML / JSON reports |
-| `tests/` | pytest checks |
-| `main.py` | Application entry point |
+- **Learning:** gathers information to build the baseline; no alert policy blocking.
+- **Monitoring:** analyzes deviations and emits detector alerts; the separate strict-mode Zero Trust rule is not enforced.
+- **Strict:** evaluates trust and connection timing and can record blocking actions or attempt physical USB disabling with elevated permissions.
 
-These module names describe the **original implementation**, not the contents currently uploaded to this scaffold.
+### Strict-mode rule in the delivered source
 
-## Important boundaries
+The function `_evaluate()` in `src/monitoring/monitor_cycle.py` considers a newly connected device compliant only when **both** conditions hold: the device is in the trusted list, **and** the connection is not anomalous for the configured schedule (including its tolerance margin).
 
-- Windows 11 is the documented target; alternative OS support is not claimed.
-- EVTX access and effective PnP-device blocking may require elevation.
-- Monitor operation depends on the application running; it is not an installed independent Windows service.
-- Observing USB artifacts does not prove a file-copy event or malicious activity.
-- The thesis has an apparent policy description inconsistency: section 9.8 states that trusted devices outside habitual hours can require blocking/TOTP, while section 9.9 describes trusted devices as exempt from scheduled blocking. Resolve from the real code and tests before documenting an exact rule table in the public repo.
+| Trusted USB device | Within tolerated schedule | Strict-policy result |
+| --- | --- | --- |
+| Yes | Yes | Allowed by this rule |
+| No | Yes | Alert / block |
+| Yes | No | Alert / block |
+| No | No | Alert / block |
+
+This resolves a difference between two prose descriptions in the original thesis: the current strict-policy implementation **does not** exempt trusted devices outside the tolerated schedule. Devices already unlocked during the running application session can be exempted from repeated blocking.
+
+In strict mode, `block_for_schedule()` can attempt a physical Plug and Play disable action; otherwise it records a logical block. **Do not interpret a blocked record as proof that Windows disabled the hardware.**
+
+## Research limitations
+
+- A USB event is an artifact, not conclusive evidence of data exfiltration.
+- Missing permissions, source variability or event retention can make forensic timelines incomplete.
+- Monitoring needs the application process to stay running.
+- Database event hashes are not chained, independently signed evidence.
+- The project has not undergone a production-readiness or enterprise privacy assessment.
