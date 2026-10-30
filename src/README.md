@@ -32,6 +32,7 @@ py -3.13 -m venv .venv
 
 - Parsed all **65 selected Python modules/tests** using Python AST: **0 syntax errors**.
 - `pytest` on Linux/Python 3.13 with available dependencies: **96 passed, 2 failed**. The two failures require the missing `pyotp` library; they are **environment failures**, not evidence that the TOTP implementation works or fails on Windows.
-- No end-to-end GUI testing, real Windows artifact access, or USB hardware blocking was performed here.
+- On 30 October 2026 the project owner executed the full suite on Windows with dependencies installed: **98 passed in 9.22s**.
+- No end-to-end GUI testing, real Windows artifact access, or USB hardware blocking was performed as part of this review.
 
 Some tests now present in the source are newer than the **74 tests** cited in the submitted June 2026 thesis. Do not mix the counts without dates and environment descriptions.
