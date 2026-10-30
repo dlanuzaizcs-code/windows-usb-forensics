@@ -1,50 +1,43 @@
-# Validation results and limitations
+# Validation and limitations
 
-> The following numbers are **reported in the 2026 thesis** (sections 10–11). We have not yet executed the original code in this repository.
+## Reported in the June 2026 academic thesis
 
-## Automated tests
+- 74 pytest tests described at submission.
+- 45 synthetic sessions with separated classes: at thresholds 0.50–0.70, the reported experiment reaches 1.00 precision, recall and F1; this is an **easy, intentionally separated** setting.
+- 50 synthetic sessions with overlapping classes: ROC AUC **approximately 0.87**. At threshold 0.50, reported precision **0.68**, recall **0.95**, F1 **0.79**, accuracy **0.80**. At threshold 0.70, recall falls to **0.50** despite precision **1.00**.
+- Separate benchmark with 1,095 synthetic sessions: processing around 2 seconds in the thesis experiment.
 
-The thesis describes **74 reproducible pytest tests** using isolated temporary databases. It includes unit and integration tests for anomaly modeling, schedule enforcement, TOTP, normalization, persistence and report generation.
+These values are not enterprise detection metrics, are **not independently rerun here**, and should not be presented without synthetic-data context.
 
-**Next task:** obtain the actual `tests/` package, list it, run it in an isolated Windows 11 environment and record the command, Python version, dependency lock, pass/fail counts and known warnings.
+![Threshold comparison — separated synthetic classes](../screenshots/experiment-1-threshold-metrics.png)
 
-## Synthetic detector experiments
+![ROC — overlapping synthetic classes](../screenshots/experiment-2-roc.png)
 
-### Scenario A: clearly separated classes
+## Source inspection on 30 October 2026
 
-45 synthetic sessions: 30 normal, 15 anomalous. For thresholds 0.50–0.70, the thesis reports TP=15, FP=0, TN=30, FN=0. This highly favorable test is **not** an estimate of real-world performance.
+Input: `TFM_Project.zip`, filtered to own code without `.git`, `.venv`, caches, databases, reports and logs.
 
-### Scenario B: overlapping classes
+- Python 3.13 AST syntax check: **65 selected files parsed**, **0 syntax errors**.
+- Tests on Linux/Python 3.13 with local available dependencies: **96 passed, 2 failed because `pyotp` was not installed**; failing tests `test_totp_generar_y_verificar` and `test_totp_uri_y_qr` from `tests/test_schedule_totp.py`.
+- Real Windows 11 artifact acquisition, PyQt6 GUI, TOTP and physical USB device blocking were **not** independently executed.
 
-50 synthetic sessions: 30 normal and 20 anomalous in the reported confusion matrices.
+## Reproduce on Windows in isolated testing environment
 
-| Threshold | TP | FP | TN | FN | Precision | Recall | F1 | Accuracy |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 0.40 | 20 | 13 | 17 | 0 | 0.61 | 1.00 | 0.76 | 0.74 |
-| 0.50 | 19 | 9 | 21 | 1 | 0.68 | 0.95 | 0.79 | 0.80 |
-| 0.60 | 10 | 5 | 25 | 10 | 0.67 | 0.50 | 0.57 | 0.70 |
-| 0.70 | 10 | 0 | 30 | 10 | 1.00 | 0.50 | 0.67 | 0.80 |
+From the `src` directory:
 
-The thesis reports ROC AUC **approximately 0.87**. Do not present the synthetic measurements as production validation. The default threshold 0.60 performed well with separated classes but not optimally for F1 in the overlapping case.
+```powershell
+py -3.13 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pytest -q
+```
 
-## Performance experiment
+**No automated USB blocking tests should run against critical or unauthorized hardware.** Save test output, version information and screenshots of **sanitized** data for the public evidence section.
 
-A separate thesis benchmark, `analytics/benchmark.py`, used **1,095 synthetic sessions** representing approximately one year of use and reported end-to-end analysis around 2 seconds. The reproducibility of that result must be checked from the original script and environment.
+## Important limitations
 
-## Known limitations (thesis section 11.2)
-
-- Synthetic scenarios are not representative of unpredictable production activity.
-- Registry/events/SetupAPI provide **indirect** indicators: they do not prove that a particular file was transferred.
-- Windows 11 and availability of event channels constrain portability.
-- Privileged access is needed for some evidence sources and device disabling.
-- Monitoring is active only while the application runs; no independent Windows service was implemented.
-- User activity monitoring may require additional retention, privacy and governance controls in organizational settings.
-- A raw SHA-256 digest on each event detects some modifications but does not itself establish a fully tamper-evident chain of custody.
-
-## Reproduction plan
-
-1. Preserve an untouched copy of the original source and thesis.
-2. Review configuration and any privileged device-control code before execution.
-3. Install dependencies from reviewed original manifests in a Windows 11 virtual machine or spare test computer.
-4. Execute the real test suite and synthetic experiment; capture commands, outputs and versions.
-5. Publish sanitized logs and regenerated graphs only after inspection.
+- Real world false-positive and detection rates are unknown.
+- Evidence of file transfer is indirect; timestamps may be incomplete or vary by Windows version.
+- EVTX access and physical device control depend on privileges and availability.
+- Monitoring runs while the GUI application is active, not as a standalone Windows service.
+- Per-event hashes are not a tamper-evident chained log.
+- TOTP secret at rest is handled through local configuration; review storage security before operational use.

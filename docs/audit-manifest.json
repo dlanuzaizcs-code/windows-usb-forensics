@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-30",
+  "source_archive": "TFM_Project.zip",
+  "source_py_files": 65,
+  "safe_images": [
+    "architecture-six-layers.png",
+    "experiment-1-threshold-metrics.png",
+    "experiment-2-roc.png"
+  ],
+  "excluded_items": [
+    ".git",
+    ".venv",
+    "sqlite DB/backups",
+    "log",
+    "reports",
+    "TOTP screenshot",
+    "other unredacted screenshots",
+    "generar_alertas_demo.py"
+  ],
+  "notes": "PRIVATE REVIEW ONLY. Do not publish before manual audit."
+}

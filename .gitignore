@@ -58,3 +58,14 @@ dist/
 
 # Local metadata
 .DS_Store
+
+# Additional source-side runtime files and originals
+*.db.bak*
+*.db-journal
+*.db-wal
+*.db-shm
+informes/
+TFM_CONTEXT.md
+CLAUDE*.md
+private_source_archive/
+capturas_originales/
