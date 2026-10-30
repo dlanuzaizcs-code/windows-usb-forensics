@@ -1,12 +1,20 @@
-# Security and privacy (private preparation)
+# Security considerations
 
-The USB forensic tool is a research prototype that accesses local Windows artifacts and may disable USB devices when its optional **strict / physical blocking** features are enabled.
+This completed Master's thesis project is a **research prototype for authorized Windows 11 testing**, not production endpoint security software.
 
-- **No real evidence in Git:** exclude SQLite database files, backups, Event Logs, raw Registry or SetupAPI exports, HTML/JSON reports, activity logs, and device identifiers.
-- **TOTP:** configuration stores a TOTP secret in the local SQLite configuration table; the supplied database **contains a nonempty secret** (confirmed without displaying it). The original supplied screenshot `10.x_TOTP.png` contains a real-looking provisioning QR and URI and **is intentionally excluded**. **Regenerate the TOTP secret if this QR was ever used for a live account/device.** Never publish QR, provisioning URI or backup codes.
-- **Admin privileges:** never run or test physical USB blocking on a workstation or storage device without owner authorization and an established recovery path. Prefer standard-user mode for first tests.
-- **History exposure:** importing a separate old Git repository, even with a new `.gitignore`, may expose secrets and files in earlier commits. Copy only selected source files into the clean current repository; never copy a nested `.git/` folder.
-- **Evidence limitations:** USB artifacts and SHA-256 per event do not independently establish physical file transfers or forensic chain of custody.
-- **Privacy:** consider access controls, data minimization, retention and applicable laws before collecting employee activity or deploying in corporate environments.
+## Running the application
 
-Contact the repository owner privately through their profile links for security concerns.
+- Begin with a standard-user account in an isolated Windows test environment.
+- Some EVTX sources are unavailable without administrator privileges; the application can operate with incomplete evidence.
+- **Strict mode** can attempt to disable a Plug and Play USB device through `Disable-PnpDevice` when elevated. Use disposable test hardware, a recovery plan and explicit authorization; never trial it on critical drives, keyboards or essential workstation devices.
+- TOTP enrollment secrets are stored in **local SQLite configuration**. The prototype does not claim encrypted secret-at-rest storage or hardened recovery suitable for production.
+- TOTP verification and physical device blocking are distinct from the statistical detector. Automated unit tests do not establish end-to-end hardware safety.
+
+## Privacy and forensic limitations
+
+- Never commit or share runtime SQLite databases, backup files, raw Registry / EVTX / SetupAPI artifacts, real USB serials, usernames, exported reports or activity logs.
+- Never publish TOTP provisioning QR codes, `otpauth://` URIs, recovery codes or authentication secrets. Rotate any credential that has been shared.
+- Event timestamps, source correlation and per-event SHA-256 do **not** prove file transfers, adversarial intent or an immutable chain of custody.
+- Collection of user activity in a workplace requires appropriate organizational authorization, access controls, retention limits and legal assessment.
+
+For private vulnerability reports, contact the maintainer through the GitHub profile.
