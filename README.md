@@ -30,7 +30,7 @@ Python 3.13 · PyQt6 · SQLite · python-registry / winreg · EVTX · NumPy / Sc
 
 The June 2026 thesis reports **74 tests** and an AUC of approximately **0.87** on an overlapping-class **synthetic** experiment (50 sessions); it is a controlled research result, not an enterprise detection benchmark. A separate synthetic benchmark of 1,095 sessions took approximately 2 seconds in the documented test setting.
 
-A new source inspection on 30 October 2026 found **65 selected Python files** in the delivered snapshot and executed pytest in Linux/Python 3.13: **96 passed, 2 could not run successfully because `pyotp` was not installed**. Full Windows 11 GUI and hardware behavior are **not** independently verified in this review.
+A 30 October 2026 source inspection found **65 selected Python files**. An initial Linux test run passed 96 tests; two TOTP tests were blocked because `pyotp` was unavailable in that environment. **On Windows, after installing the project dependencies, the project owner ran `python -m pytest -q`: 98 passed in 9.22 seconds.** This validates the automated test suite in the user's Windows environment, **not** full GUI operation or physical USB-blocking behavior.
 
 ![ROC of the overlapping synthetic experiment](screenshots/experiment-2-roc.png)
 
